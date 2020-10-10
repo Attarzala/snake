@@ -1,10 +1,13 @@
 import pygame
 import time
+import random
+
 pygame.init()
 
 width = 800
 height = 600
 black = (0, 0, 0)
+red = (255, 0, 0)
 white = (255, 255, 255)
 
 ball_width = 120
@@ -14,6 +17,10 @@ pygame.display.set_caption('A bit Racey')
 screen = pygame.display.set_mode((width, height))
 
 ball = pygame.image.load('intro_ball.png')
+
+
+def food(foodx, foody, foodw, foodh, color):
+    pygame.draw.rect(screen, color, [foodx, foody, foodw, foodh])
 
 
 def text_objects(text, font):
@@ -42,10 +49,15 @@ def update_ball(x, y):
 
 
 def game_loop():
-    x = (width * 0.45)
-    y = (height * 0.8)
+    ball_x = (width * 0.45)
+    ball_y = (height * 0.8)
     x_change = 0
     y_change = 0
+
+    food_spawnx = random.randrange(ball_width, width)
+    food_spawny = random.randrange(ball_width, height)
+    food_width = 150
+    food_heigth = 150
     error = False
 
     while not error:
@@ -66,19 +78,26 @@ def game_loop():
                 if event.key == pygame.K_RIGHT:
                     x_change = 5
                     y_change = 0
-        y += y_change
-        x += x_change
+        ball_y += y_change
+        ball_x += x_change
 
         screen.fill(white)
-        update_ball(x, y)
+        food(food_spawnx, food_spawny, food_width, food_heigth, red) # food(foodx, foody, foodw, foodh, color)
+        update_ball(ball_x, ball_y)
 
-        if x > width - ball_width or x < 0 or y > height - ball_width or y < 0:
+        # Out of borders(screen atm)?
+        if ball_x > width - ball_width or ball_x < 0 or ball_y > height - ball_width or ball_y < 0:
             fail()
 
+        # Is the ball touching the food?
+        if ball_x + ball_width > food_spawnx and ball_x < food_spawnx + food_width:
+            if ball_y < food_spawny + food_width and ball_y + ball_width > food_spawny:
+                print("Nisse")
 
+        # if ball on food, spawn new food and delete old food from screen..?
 
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(10)
 
 
 game_loop()
