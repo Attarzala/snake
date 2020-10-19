@@ -11,7 +11,7 @@ red = (255, 0, 0)  # Replace with apple
 white = (255, 255, 255)
 
 ball_width = 111
-
+snake_tail = []
 
 clock = pygame.time.Clock()
 pygame.display.set_caption('A bit Racey')
@@ -57,8 +57,10 @@ def fail():
     message_display("You sack")
 
 
-def update_ball(x, y):
-    screen.blit(ball, (x, y))
+def update_ball(snake_tail):
+    for x in snake_tail:
+        pygame.draw.rect(screen, white, (x[0], x[1], ball_width, ball_width))
+        screen.blit(ball, [x[0], x[1]])
 
 
 def new_food_position():
@@ -74,9 +76,8 @@ def game_loop():
     y_change = 0
     food_spawny, food_spawnx = new_food_position()
     food_width = 38  # Actual size of apple.png
-    tick = 60
+    tick = 1
     score = 0
-
     error = False
 
     while not error:
@@ -86,24 +87,23 @@ def game_loop():
                 error = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
-                    y_change = 5
+                    y_change = 111
                     x_change = 0
                 if event.key == pygame.K_UP:
-                    y_change = -5
+                    y_change = -111
                     x_change = 0
                 if event.key == pygame.K_LEFT:
-                    x_change = -5
+                    x_change = -111
                     y_change = 0
                 if event.key == pygame.K_RIGHT:
-                    x_change = 5
+                    x_change = 111
                     y_change = 0
         ball_y += y_change
         ball_x += x_change
 
         screen.fill(white)
-        # food(food_spawnx, food_spawny, food_width, food_width, red)  # food(foodx, foody, foodw, foodh, color)
-        update_ball(ball_x, ball_y)
-        update_food(food_spawnx,food_spawny, food_width, food_width)
+        update_ball(snake_tail)
+        update_food(food_spawnx, food_spawny, food_width, food_width)
         score_counter(score)
         # Out of borders(screen atm)?
         if ball_x > width - ball_width or ball_x < 0 or ball_y > height - ball_width or ball_y < 0:
@@ -114,10 +114,17 @@ def game_loop():
             if ball_y < food_spawny + food_width and ball_y + ball_width > food_spawny:
                 print(tick)
                 score += 1
-                tick += 1
                 food_spawny, food_spawnx = new_food_position()
 
         # if ball on food, spawn new food and delete old food from screen..?
+        snake_head = [ball_x, ball_y]
+        snake_tail.append(snake_head)
+        if len(snake_tail) > score+1:
+            del snake_tail[0]
+        # Eat tail?
+        for x in snake_tail[:-1]:
+            if x == snake_head:
+                error = True
 
         pygame.display.update()
         clock.tick(tick)
